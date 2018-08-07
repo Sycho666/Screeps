@@ -1,5 +1,6 @@
 var fullCarry = {
 
+    /** @param {Creep} creep **/
     run: function(creep) {
 	
         if(creep.memory.fullCarry == true && creep.carry.energy == 0) {
@@ -10,10 +11,6 @@ var fullCarry = {
         }
         
         const targetSource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
-        const container = creep.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (s) => s.structureType == STRUCTURE_CONTAINER
-                        && s.store.energy < creep.carryCapacity
-        });
         const largeStorage = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (s) => s.structureType == STRUCTURE_STORAGE
                         && s.store.energy > creep.carryCapacity
@@ -23,31 +20,20 @@ var fullCarry = {
 							&& i.energy < i.energyCapacity
         });
         const refillCarryFromSource = function(fillFromSource) {
-            creep.moveTo(fillFromSource);
-            creep.pickup(fillFromSource);
-        }
-        const refillCarryFromContainer = function(fillFromContainer) {
-            creep.moveTo(fillFromContainer);
-            creep.withdraw(fillFromContainer, RESOURCE_ENERGY);
+			if(fillFromSource) {
+				if(creep.pickup(fillFromSource) == ERR_NOT_IN_RANGE) {
+					creep.moveTo(fillFromSource);
+				}
+			}
         }
         const refillCarryFromStorage = function(fillFromStorage) {
             creep.moveTo(fillFromStorage);
             creep.withdraw(fillFromStorage, RESOURCE_ENERGY);
         }
-
+		
         if(creep.memory.role !== 'hauler') {
-            if(creep.memory.fullCarry == false && extCheck == 0) {
-                if (creep.pos.getRangeTo(targetSource) > creep.pos.getRangeTo(container)) {                        
-                    refillCarryFromContainer(container);
-                } else if (creep.pos.getRangeTo(targetSource) > creep.pos.getRangeTo(largeStorage)) {  
-                    refillCarryFromStorage(largeStorage);
-                } else {                    
-                    refillCarryFromSource(targetSource);
-                } 
-            } else if(creep.memory.fullCarry == false) {
-                if (creep.pos.getRangeTo(targetSource) > creep.pos.getRangeTo(container)) {  
-                    refillCarryFromContainer(container);
-                } else if (creep.pos.getRangeTo(targetSource) > creep.pos.getRangeTo(largeStorage)) { 
+            if(creep.memory.fullCarry == false) {               
+				if (creep.pos.getRangeTo(targetSource) > creep.pos.getRangeTo(largeStorage)) { 
                     refillCarryFromStorage(largeStorage);
                 } else {                    
                     creep.moveTo(16, 43);

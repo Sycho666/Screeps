@@ -18,6 +18,10 @@ module.exports.loop = function () {
 		}
 	}
 	
+	const extCheck = creep.room.find(FIND_STRUCTURES, {
+		filter: (i) => i.structureType == STRUCTURE_EXTENSION 
+						&& i.energy < i.energyCapacity
+	});
 	var miner = _.filter(Game.creeps, (creep) => creep.memory.role == 'miner');
 	var hauler = _.filter(Game.creeps, (creep) => creep.memory.role == 'hauler');
 	var builder = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
@@ -31,34 +35,36 @@ module.exports.loop = function () {
 		});
 	}
 		
-    if(hauler.length < 2) {
+    if(hauler.length < 1) {
         var newName = 'Hauler' + Game.time;
-        Game.spawns['Asylum'].spawnCreep([CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], newName, //300 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
+        Game.spawns['Asylum'].spawnCreep([CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], newName, //300 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
             {memory: {role: 'hauler', fullCarry: false}});
 	}
-			
-    if(builder.length < 1) {
-        var newName = 'Builder' + Game.time;
-        Game.spawns['Asylum'].spawnCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], newName, //450 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
-            {memory: {role: 'builder', fullCarry: false}});
+	
+	if(extCheck == 0) {
+		if(builder.length < 1) {
+			var newName = 'Builder' + Game.time;
+			Game.spawns['Asylum'].spawnCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], newName, //450 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
+				{memory: {role: 'builder', fullCarry: false, building: true}});
+		}
+				
+		if(upgrader.length < 1) {
+			var newName = 'Upgrader' + Game.time;
+			Game.spawns['Asylum'].spawnCreep([WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], newName, //450 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
+				{memory: {role: 'upgrader', fullCarry: false}});
+		}
+				
+		if(fixer.length < 2) {
+			var newName = 'Fixer' + Game.time;
+			Game.spawns['Asylum'].spawnCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], newName, //450 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
+				{memory: {role: 'fixer', fullCarry: false}});
+		}
 	}
-			
-    if(upgrader.length < 1) {
-        var newName = 'Upgrader' + Game.time;
-        Game.spawns['Asylum'].spawnCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], newName, //450 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
-            {memory: {role: 'upgrader', fullCarry: false}});
-    }
-			
-    if(fixer.length < 1) {
-        var newName = 'Fixer' + Game.time;
-        Game.spawns['Asylum'].spawnCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], newName, //450 energy - road(2*(4*0.5-2)=0),road(2*(4*1-2)=4),road(2*(4*5-2)=36)
-            {memory: {role: 'fixer', fullCarry: false}});
-    }
     
     if(Game.spawns['Asylum'].spawning) { 
         var spawningCreep = Game.creeps[Game.spawns['Asylum'].spawning.name];
         Game.spawns['Asylum'].room.visual.text(
-            '🛠️' + spawningCreep.memory.role,
+            '???' + spawningCreep.memory.role,
             Game.spawns['Asylum'].pos.x + 1, 
             Game.spawns['Asylum'].pos.y, 
             {align: 'left', opacity: 0.8});

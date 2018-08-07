@@ -1,5 +1,6 @@
 var roleFixer = {
 
+    /** @param {Creep} creep **/
     run: function(creep) {	
 
 		var fullCarry = require('role.fullCarry');

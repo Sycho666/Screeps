@@ -1,39 +1,44 @@
 var roleHauler = {
-
+	
+    /** @param {Creep} creep **/
     run: function(creep) {
 
-        var fullCarry = require('role.fullCarry');
-        fullCarry.run(creep);
-
-        const checkExtensions = _.filter(Game.structures, (i) => (i.structureType == STRUCTURE_EXTENSION) && i.energy < i.energyCapacity);
-        const checkSpawn = _.filter(Game.structures, (i) => (i.structureType == STRUCTURE_SPAWN) && i.energy < i.energyCapacity);
-        const checkTowers = _.filter(Game.structures, (i) => (i.structureType == STRUCTURE_TOWER) && i.energy < i.energyCapacity);
-        const checkStorage = _.filter(Game.structures, (i) => (i.structureType == STRUCTURE_STORAGE) && i.store.energy < i.storeCapacity);
-        const checkContainer = _.filter(Game.structures, (i) => (i.structureType == STRUCTURE_CONTAINER) && i.store.energy < i.storeCapacity);
+        const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);   
+        const container = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (s) => s.structureType == STRUCTURE_CONTAINER
+        });
         const fillClosest = function(fillTheStuff) {
             creep.moveTo(creep.pos.findClosestByRange(fillTheStuff), {visualizePathStyle: {stroke: '#ffffff'}});
             creep.transfer(creep.pos.findClosestByRange(fillTheStuff), RESOURCE_ENERGY);
+        }      
+        const checkExtensions = creep.room.find(FIND_STRUCTURES, {
+            filter: (i) => (i.structureType == STRUCTURE_EXTENSION ||
+                            i.structureType == STRUCTURE_SPAWN ||
+                            i.structureType == STRUCTURE_TOWER) && i.energy < i.energyCapacity
+        });
+        const checkStorage = creep.room.find(FIND_STRUCTURES, {
+            filter: (i) => i.structureType == STRUCTURE_STORAGE
+                        && i.store.energy < i.storeCapacity
+        });     
+        
+        if(target) {
+            if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
+            }
+        }
+        if(container) {
+            if(creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(container);
+            }
         }
 
-        switch(creep.memory.fullCarry = true) {
-            case checkExtensions.length > 0:
-                fillClosest(checkExtensions);
-                break;
-            case checkSpawn.length > 0:
-                fillClosest(checkSpawn);
-                break;
-            case checkTowers.length > 0:
-                fillClosest(checkTowers);
-                break;
-            case checkStorage.length > 0:
-                fillClosest(checkStorage);
-                break;
-            case checkContainer.length > 0:
-                fillClosest(checkContainer);
-                break;
-            default:
-                //console.log('test');
+        if(checkExtensions.length > 0){
+            fillClosest(checkExtensions);
+        } else if(checkStorage.length > 0 && creep.carry.energy == creep.carryCapacity){
+            fillClosest(checkStorage);
         }
+
+        
     }
 };
 
